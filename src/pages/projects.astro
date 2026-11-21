@@ -1,0 +1,42 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHead from '../components/PageHead.astro';
+
+const projects = (await getCollection('projects', ({ data }) => data.published)).sort(
+  (a, b) => a.data.order - b.data.order || a.data.name.localeCompare(b.data.name)
+);
+---
+<BaseLayout title="projects" description="Half-finished tools, scripts, and things I made at 2am.">
+  <section class="page-shell shell">
+    <PageHead
+      eyebrow="03 / my mess"
+      title="projects"
+      description="half-finished tools, small scripts, and things i made at 2am and never explained to anyone."
+    />
+
+    {projects.length === 0 ? (
+      <div class="empty-state">
+        <span aria-hidden="true">⌁</span>
+        <h2>nothing public yet.</h2>
+        <p>everything is in a folder called <code>stuff/</code> and i am not proud of it.</p>
+      </div>
+    ) : (
+      <div class="project-grid">
+        {projects.map(({ data }) => {
+          const Tag = data.link ? 'a' : 'div';
+          return (
+            <Tag class="project-card" href={data.link} rel={data.link ? 'noreferrer' : undefined}>
+              <span class:list={['pill', data.status]}>{data.status}</span>
+              <h2>{data.name}</h2>
+              <p>{data.description}</p>
+              {data.tags.length > 0 && (
+                <div class="tag-list">{data.tags.map((tag) => <span class="tag">{tag}</span>)}</div>
+              )}
+            </Tag>
+          );
+        })}
+      </div>
+    )}
+  </section>
+</BaseLayout>

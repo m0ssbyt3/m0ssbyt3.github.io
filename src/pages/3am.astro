@@ -1,0 +1,24 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { withBase } from '../config';
+import now from '../data/now.json';
+---
+<BaseLayout title="3am" description="you weren't supposed to find this one.">
+  <section class="secret shell-narrow">
+    <p class="eyebrow">unlisted / 00</p>
+    <h1>oh. you actually clicked it.</h1>
+    <p class="lede">
+      congrats, you found the page i don't link from the nav. it's just me, this font, and whatever i was
+      listening to when i last touched the site — <strong>{now.track}</strong> by {now.artist}.
+    </p>
+    <pre style="border:1px solid var(--line);padding:18px;color:var(--muted);font-size:11px;overflow-x:auto">root@maya:~$ cat .confessions
+- i have 41 browser tabs open and i'm attached to all of them
+- i've read the HTTP spec for fun. multiple times. on purpose.
+- i've bought the same book twice because i forgot i owned it. twice.
+- every hard problem gets solved outside with a cigarette, not at the desk
+- i'd trade a whole weekend for one good cold sunset and a hot drink</pre>
+    <div class="actions">
+      <a class="button" href={withBase('/')}>back to the normal internet</a>
+    </div>
+  </section>
+</BaseLayout>

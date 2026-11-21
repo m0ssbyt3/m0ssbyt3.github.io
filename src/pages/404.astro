@@ -1,0 +1,18 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { withBase } from '../config';
+---
+<BaseLayout title="404" description="This page does not exist. Possibly it never did.">
+  <section class="not-found shell-narrow">
+    <p class="eyebrow">error / 404</p>
+    <h1>lost <em>packet.</em></h1>
+    <p class="lede">
+      this page doesn't exist. maybe it never did, maybe i deleted it at 3am and told myself i'd remember why.
+      either way — dropped silently, no RST.
+    </p>
+    <div class="actions">
+      <a class="button primary" href={withBase('/')}>go home <span>↗</span></a>
+      <a class="button" href={withBase('/writeups/')}>read something instead</a>
+    </div>
+  </section>
+</BaseLayout>

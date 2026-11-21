@@ -1,0 +1,101 @@
+---
+import { getCollection } from 'astro:content';
+import { existsSync } from 'node:fs';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { siteConfig, withBase } from '../config';
+import { byNewest, entrySlug, formatDate } from '../utils/content';
+import now from '../data/now.json';
+
+const writeups = (await getCollection('writeups', ({ data }) => data.published)).sort(byNewest).slice(0, 3);
+// Drop a file at public/avatar.{jpg,png,webp} and it replaces the monogram automatically.
+const photo = ['jpg', 'jpeg', 'png', 'webp'].map((ext) => `avatar.${ext}`).find((file) => existsSync(`public/${file}`));
+---
+<BaseLayout>
+  <section class="hero" id="home">
+    <div>
+      <p class="eyebrow">{siteConfig.tagline}</p>
+      <h1>hi, i'm <em>maya.</em><br />i break things<br /><em>gently.</em></h1>
+      <p class="intro">
+        {siteConfig.age} · {siteConfig.pronouns} · {siteConfig.location}<br /><br />
+        Computer science student, web security enthusiast, and
+        <strong>professional overthinker.</strong> Usually found poking at HTTP
+        requests, collecting playlists, or pretending my sleep schedule is fixable.
+      </p>
+      <div class="actions">
+        <a class="button primary" href={withBase('/about/')}>get to know me <span>↗</span></a>
+        <a class="button" href={withBase('/writeups/')}>read my notes <span>⌁</span></a>
+      </div>
+    </div>
+
+    <div class="hero-art" aria-label="Decorative Maya monogram">
+      <div class="orbit"></div>
+      <div class:list={['avatar', photo && 'has-photo']}>
+        {photo && <img src={withBase(`/${photo}`)} alt="Maya" />}
+        <div class="avatar-top"><span>M / 2005</span><span>✳</span></div>
+        <div class="avatar-center">
+          {!photo && <div class="avatar-symbol">m.</div>}
+          <div class="avatar-name">Maya</div>
+        </div>
+        <div class="avatar-bottom"><span>NOT A ROBOT</span><span>01 — 09</span></div>
+      </div>
+      <div class="floating float-one">୨୧ currently debugging life</div>
+      <div class="floating float-two">root@maya:~$ whoami</div>
+    </div>
+  </section>
+
+  <section class="below" id="about">
+    <div class="section-line"><span>01 / little bits about me</span></div>
+    <div class="lower-grid">
+      <a class="mini-card" href={withBase('/writeups/')}>
+        <div class="icon">⌘</div>
+        <h2>the tech side</h2>
+        <p>Web security, Linux, weird HTTP behaviour, CTFs, and learning things the hard way.</p>
+      </a>
+      <a class="mini-card" href={withBase('/about/')}>
+        <div class="icon">☾</div>
+        <h2>the other side</h2>
+        <p>Books i read too fast, maths i do for fun, cigarettes i should quit, and cold-weather sunsets.</p>
+      </a>
+      <a class="mini-card" href={withBase('/projects/')}>
+        <div class="icon">⌁</div>
+        <h2>the mess</h2>
+        <p>Small tools, half-finished scripts, and things I made at 2am without explaining why.</p>
+      </a>
+    </div>
+    <div class="now">
+      <div>
+        <div class="now-label">A LITTLE STATUS UPDATE</div>
+        <div class="now-track">♫ <span>currently listening</span> · {now.track} — {now.artist}</div>
+      </div>
+      <p class="quote" id="quote" title="click for another thought">“{siteConfig.quotes[0]}”</p>
+    </div>
+  </section>
+
+  {writeups.length > 0 && (
+    <section class="below" id="writeups" style="padding-bottom:90px">
+      <div class="section-line"><span>02 / things i wrote down</span></div>
+      <div class="post-list">
+        {writeups.map((post) => (
+          <article class="post-card">
+            <div class="meta">
+              <time datetime={post.data.date.toISOString()}>{formatDate(post.data.date)}</time>
+              {post.data.platform && <span>{post.data.platform}</span>}
+            </div>
+            <h2><a href={withBase(`/writeups/${entrySlug(post)}/`)}>{post.data.title}</a></h2>
+            <p>{post.data.description}</p>
+          </article>
+        ))}
+      </div>
+      <div class="actions"><a class="button" href={withBase('/writeups/')}>all writeups <span>→</span></a></div>
+    </section>
+  )}
+</BaseLayout>
+
+<script define:vars={{ quotes: siteConfig.quotes }}>
+  const quote = document.querySelector('#quote');
+  quote?.addEventListener('click', () => {
+    let next = quote.textContent;
+    while (next === quote.textContent) next = `“${quotes[Math.floor(Math.random() * quotes.length)]}”`;
+    quote.textContent = next;
+  });
+</script>

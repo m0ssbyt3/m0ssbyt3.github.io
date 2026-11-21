@@ -1,0 +1,93 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHead from '../../components/PageHead.astro';
+import WriteupCard from '../../components/WriteupCard.astro';
+import { byNewest, entrySlug } from '../../utils/content';
+
+const posts = (await getCollection('writeups', ({ data }) => data.published)).sort(byNewest);
+const platforms = [...new Set(posts.map((p) => p.data.platform).filter((v): v is string => Boolean(v)))].sort();
+const tags = [...new Set(posts.flatMap((p) => p.data.tags))].sort();
+---
+<BaseLayout title="writeups" description="CTFs, labs, web security rabbit holes, and things I broke on purpose.">
+  <section class="page-shell shell">
+    <PageHead
+      eyebrow="02 / things i wrote down"
+      title="writeups"
+      description="CTFs, labs, web security rabbit holes, and the occasional thing i broke on purpose."
+    />
+
+    {posts.length === 0 ? (
+      <div class="empty-state">
+        <span aria-hidden="true">∅</span>
+        <h2>nothing here yet.</h2>
+        <p>the first writeup is probably half-finished in a terminal somewhere.</p>
+      </div>
+    ) : (
+      <>
+        <div class="filters">
+          <input id="search" type="search" placeholder="search writeups…" aria-label="Search writeups" />
+          <select id="platform" aria-label="Filter by platform">
+            <option value="">all platforms</option>
+            {platforms.map((platform) => <option value={platform.toLowerCase()}>{platform}</option>)}
+          </select>
+          <select id="tag" aria-label="Filter by tag">
+            <option value="">all tags</option>
+            {tags.map((tag) => <option value={tag.toLowerCase()}>{tag}</option>)}
+          </select>
+          <span id="count" style="color:var(--faint);font-size:9px;letter-spacing:.1em">{posts.length} total</span>
+        </div>
+        <div class="post-list" id="list">
+          {posts.map((post) => <WriteupCard slug={entrySlug(post)} {...post.data} />)}
+        </div>
+        <div class="empty-state" id="no-results" hidden>
+          <span aria-hidden="true">✳</span>
+          <h2>nothing matches that.</h2>
+          <p>try fewer words, or trust me less.</p>
+        </div>
+      </>
+    )}
+  </section>
+</BaseLayout>
+
+<script>
+  const search = document.querySelector<HTMLInputElement>('#search');
+  const platform = document.querySelector<HTMLSelectElement>('#platform');
+  const tag = document.querySelector<HTMLSelectElement>('#tag');
+  const count = document.querySelector<HTMLElement>('#count');
+  const noResults = document.querySelector<HTMLElement>('#no-results');
+  const cards = [...document.querySelectorAll<HTMLElement>('.post-card')];
+
+  const apply = () => {
+    const term = (search?.value ?? '').trim().toLowerCase();
+    const wantedPlatform = platform?.value ?? '';
+    const wantedTag = tag?.value ?? '';
+    let shown = 0;
+    cards.forEach((card) => {
+      const tags = (card.dataset.tags ?? '').split(',');
+      const visible =
+        (!term || (card.dataset.search ?? '').includes(term)) &&
+        (!wantedPlatform || card.dataset.platform === wantedPlatform) &&
+        (!wantedTag || tags.includes(wantedTag));
+      card.hidden = !visible;
+      if (visible) shown += 1;
+    });
+    if (count) count.textContent = shown === cards.length ? `${cards.length} total` : `${shown} of ${cards.length}`;
+    if (noResults) noResults.hidden = shown > 0;
+  };
+
+  search?.addEventListener('input', apply);
+  platform?.addEventListener('change', apply);
+  tag?.addEventListener('change', apply);
+  document.querySelectorAll<HTMLElement>('.tag[data-tag]').forEach((button) =>
+    button.addEventListener('click', () => {
+      if (tag) tag.value = tag.value === button.dataset.tag ? '' : (button.dataset.tag ?? '');
+      apply();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    })
+  );
+
+  const fromUrl = new URLSearchParams(location.search).get('tag');
+  if (fromUrl && tag) tag.value = fromUrl.toLowerCase();
+  apply();
+</script>

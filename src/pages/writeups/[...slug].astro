@@ -1,0 +1,16 @@
+---
+import { getCollection, render } from 'astro:content';
+import WriteupLayout from '../../layouts/WriteupLayout.astro';
+import { entrySlug, readingTime } from '../../utils/content';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('writeups', ({ data }) => data.published);
+  return posts.map((post) => ({ params: { slug: entrySlug(post) }, props: { post } }));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+---
+<WriteupLayout {...post.data} minutes={readingTime(post.body ?? '')}>
+  <Content />
+</WriteupLayout>

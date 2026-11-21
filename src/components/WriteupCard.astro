@@ -1,0 +1,30 @@
+---
+import { withBase } from '../config';
+import { formatDate } from '../utils/content';
+
+interface Props {
+  slug: string; title: string; description: string; date: Date;
+  tags?: string[]; platform?: string; difficulty?: string;
+}
+const { slug, title, description, date, tags = [], platform, difficulty } = Astro.props;
+const haystack = `${title} ${description} ${platform ?? ''} ${difficulty ?? ''} ${tags.join(' ')}`.toLowerCase();
+---
+<article
+  class="post-card"
+  data-search={haystack}
+  data-platform={(platform ?? '').toLowerCase()}
+  data-tags={tags.join(',').toLowerCase()}
+>
+  <div class="meta">
+    <time datetime={date.toISOString()}>{formatDate(date)}</time>
+    {platform && <span>{platform}</span>}
+    {difficulty && <span>{difficulty}</span>}
+  </div>
+  <h2><a href={withBase(`/writeups/${slug}/`)}>{title}</a></h2>
+  <p>{description}</p>
+  {tags.length > 0 && (
+    <div class="tag-list" aria-label="Tags">
+      {tags.map((tag) => <button class="tag" type="button" data-tag={tag.toLowerCase()}>{tag}</button>)}
+    </div>
+  )}
+</article>
