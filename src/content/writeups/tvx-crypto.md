@@ -17,7 +17,7 @@ difficulty: easy
 
 ## Challenge Files
 
-this challenge gave me 2 files, those are the contents of the file...
+this challenge gave me 2 files, those are the contents of the file
 
 ```
 c = 1574928985319013777436289945491687612751672976588545303342361399014858100334313795739
